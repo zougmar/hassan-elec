@@ -7,9 +7,9 @@ export const getImageUrl = (imagePath) => {
     return imagePath;
   }
   
-  // Otherwise, construct the full URL
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  const baseUrl = apiUrl.replace('/api', '');
+  // Otherwise, construct the full URL (same origin in prod, localhost in dev)
+  const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
+  const baseUrl = apiBase.startsWith('http') ? apiBase.replace(/\/api\/?$/, '') : window.location.origin;
   
   return `${baseUrl}${imagePath}`;
 };
