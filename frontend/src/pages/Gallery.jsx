@@ -27,10 +27,10 @@ const Gallery = () => {
   };
 
   const allImages = (Array.isArray(projects) ? projects : []).flatMap(project =>
-    project.images?.map(img => ({
+    (Array.isArray(project?.images) ? project.images : []).map(img => ({
       url: img,
       projectTitle: project.title?.[i18n.language] || project.title?.en
-    })) || []
+    }))
   );
 
   const openLightbox = (url, index) => {

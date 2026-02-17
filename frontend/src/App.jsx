@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 
 // Components
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -31,6 +32,7 @@ function App() {
   }, [i18n.language]);
 
   return (
+    <ErrorBoundary>
     <ThemeProvider>
       <AuthProvider>
         <Toaster position="top-right" />
@@ -80,6 +82,7 @@ function App() {
       </Router>
       </AuthProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

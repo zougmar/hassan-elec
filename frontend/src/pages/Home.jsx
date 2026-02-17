@@ -151,9 +151,9 @@ const Home = () => {
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-800 mx-auto"></div>
             </div>
-          ) : services.length > 0 ? (
+          ) : (Array.isArray(services) ? services : []).length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {services.map((service) => (
+              {(Array.isArray(services) ? services : []).map((service) => (
                 <div key={service._id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                   {service.image && (
                     <img
@@ -200,9 +200,9 @@ const Home = () => {
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-800 mx-auto"></div>
             </div>
-          ) : projects.length > 0 ? (
+          ) : (Array.isArray(projects) ? projects : []).length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {projects.map((project) => (
+              {(Array.isArray(projects) ? projects : []).map((project) => (
                 <div key={project._id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                   {project.images && project.images.length > 0 && (
                     <img
