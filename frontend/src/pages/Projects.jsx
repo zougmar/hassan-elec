@@ -15,9 +15,9 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       const response = await api.get('/projects');
-      setProjects(response.data);
+      setProjects(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      setProjects([]);
     } finally {
       setLoading(false);
     }

@@ -18,15 +18,15 @@ const Gallery = () => {
   const fetchProjects = async () => {
     try {
       const response = await api.get('/projects');
-      setProjects(response.data);
+      setProjects(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const allImages = projects.flatMap(project =>
+  const allImages = (Array.isArray(projects) ? projects : []).flatMap(project =>
     project.images?.map(img => ({
       url: img,
       projectTitle: project.title?.[i18n.language] || project.title?.en

@@ -21,10 +21,11 @@ const Home = () => {
         api.get('/services'),
         api.get('/projects')
       ]);
-      setServices(servicesRes.data.slice(0, 3));
-      setProjects(projectsRes.data.slice(0, 3));
+      setServices(Array.isArray(servicesRes?.data) ? servicesRes.data.slice(0, 3) : []);
+      setProjects(Array.isArray(projectsRes?.data) ? projectsRes.data.slice(0, 3) : []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      setServices([]);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
