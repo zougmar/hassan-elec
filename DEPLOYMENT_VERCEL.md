@@ -31,6 +31,8 @@ In Vercel: **Project Settings** → **Environment Variables** → add:
 | `JWT_SECRET` | A long random string (min 32 characters) |
 | `JWT_EXPIRE` | `7d` |
 
+**Important:** Do **not** set `VITE_API_URL` for this project. The frontend uses relative `/api` when deployed (same origin), so API requests work automatically. Setting `VITE_API_URL=http://localhost:5000/api` would break the deployed site (browser would try to reach your local machine).
+
 ### 4. Redeploy
 
 After adding env vars, go to **Deployments** → **⋯** on the latest deployment → **Redeploy**.

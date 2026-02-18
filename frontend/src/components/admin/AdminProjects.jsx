@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
+import { getImageUrl } from '../../utils/imageUrl';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 
@@ -95,7 +96,7 @@ const AdminProjects = () => {
       category: project.category || 'general',
       images: []
     });
-    setPreviews(project.images?.map(img => `http://localhost:5000${img}`) || []);
+    setPreviews(project.images?.map(img => getImageUrl(img)) || []);
     setShowModal(true);
   };
 
@@ -154,7 +155,7 @@ const AdminProjects = () => {
             <div key={project._id} className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
               {project.images && project.images.length > 0 && (
                 <img
-                  src={`http://localhost:5000${project.images[0]}`}
+                  src={getImageUrl(project.images[0])}
                   alt="Project"
                   className="w-full h-48 object-cover"
                 />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
+import { getImageUrl } from '../../utils/imageUrl';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 
@@ -95,7 +96,7 @@ const AdminServices = () => {
       order: service.order || 0,
       image: null
     });
-    setPreview(service.image ? `http://localhost:5000${service.image}` : null);
+    setPreview(service.image ? getImageUrl(service.image) : null);
     setShowModal(true);
   };
 
@@ -154,7 +155,7 @@ const AdminServices = () => {
             <div key={service._id} className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
               {service.image && (
                 <img
-                  src={`http://localhost:5000${service.image}`}
+                  src={getImageUrl(service.image)}
                   alt="Service"
                   className="w-full h-48 object-cover"
                 />

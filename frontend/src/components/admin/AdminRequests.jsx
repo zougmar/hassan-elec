@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
+import { getImageUrl } from '../../utils/imageUrl';
 import toast from 'react-hot-toast';
 import { Trash2, Eye, X } from 'lucide-react';
 
@@ -201,7 +202,7 @@ const AdminRequests = () => {
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{t('admin.image')}</label>
                     <img
-                      src={`http://localhost:5000${selectedRequest.image}`}
+                      src={getImageUrl(selectedRequest.image)}
                       alt="Request"
                       className="w-full max-w-md h-64 object-cover rounded-xl border border-slate-200"
                     />
