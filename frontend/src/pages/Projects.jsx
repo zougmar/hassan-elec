@@ -48,13 +48,20 @@ const Projects = () => {
                 key={project._id}
                 className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
-                {project.images && project.images.length > 0 && (
-                  <img
-                    src={getImageUrl(project.images[0])}
-                    alt={getLocalizedText(project.title, currentLang)}
-                    className="w-full h-64 object-cover"
-                  />
-                )}
+                <div className="w-full h-64 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden relative">
+                  {project.images && project.images.length > 0 ? (
+                    <img
+                      src={getImageUrl(project.images[0])}
+                      alt={getLocalizedText(project.title, currentLang)}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span className="text-slate-400 dark:text-slate-500 text-4xl">📷</span>
+                  )}
+                </div>
                 <div className="p-6">
                   <h3 className="text-2xl font-semibold mb-3">
                     {getLocalizedText(project.title, currentLang)}

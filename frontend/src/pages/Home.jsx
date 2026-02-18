@@ -155,13 +155,18 @@ const Home = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {(Array.isArray(services) ? services : []).map((service) => (
                 <div key={service._id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                  {service.image && (
-                    <img
-                      src={getImageUrl(service.image)}
-                      alt={getLocalizedText(service.title, currentLang)}
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
+                  <div className="w-full h-48 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden relative">
+                    {service.image ? (
+                      <img
+                        src={getImageUrl(service.image)}
+                        alt={getLocalizedText(service.title, currentLang)}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span className="text-slate-400 dark:text-slate-500 text-4xl">📷</span>
+                    )}
+                  </div>
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-2">
                       {getLocalizedText(service.title, currentLang)}
@@ -204,13 +209,18 @@ const Home = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {(Array.isArray(projects) ? projects : []).map((project) => (
                 <div key={project._id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                  {project.images && project.images.length > 0 && (
-                    <img
-                      src={getImageUrl(project.images[0])}
-                      alt={getLocalizedText(project.title, currentLang)}
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
+                  <div className="w-full h-48 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden relative">
+                    {project.images && project.images.length > 0 ? (
+                      <img
+                        src={getImageUrl(project.images[0])}
+                        alt={getLocalizedText(project.title, currentLang)}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span className="text-slate-400 dark:text-slate-500 text-4xl">📷</span>
+                    )}
+                  </div>
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-2">
                       {getLocalizedText(project.title, currentLang)}
