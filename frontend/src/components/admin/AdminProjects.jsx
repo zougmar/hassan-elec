@@ -68,14 +68,10 @@ const AdminProjects = () => {
       }
 
       if (editingProject) {
-        await api.put(`/projects/${editingProject._id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.put(`/projects/${editingProject._id}`, data);
         toast.success(t('admin.saved'));
       } else {
-        await api.post('/projects', data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/projects', data);
         toast.success(t('admin.saved'));
       }
 
@@ -84,7 +80,8 @@ const AdminProjects = () => {
       fetchProjects();
     } catch (error) {
       console.error('Error saving project:', error);
-      toast.error(t('admin.error'));
+      const message = error.response?.data?.message || error.message || t('admin.error');
+      toast.error(message);
     }
   };
 

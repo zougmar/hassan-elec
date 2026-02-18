@@ -68,14 +68,10 @@ const AdminServices = () => {
       }
 
       if (editingService) {
-        await api.put(`/services/${editingService._id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.put(`/services/${editingService._id}`, data);
         toast.success(t('admin.saved'));
       } else {
-        await api.post('/services', data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/services', data);
         toast.success(t('admin.saved'));
       }
 
@@ -84,7 +80,8 @@ const AdminServices = () => {
       fetchServices();
     } catch (error) {
       console.error('Error saving service:', error);
-      toast.error(t('admin.error'));
+      const message = error.response?.data?.message || error.message || t('admin.error');
+      toast.error(message);
     }
   };
 

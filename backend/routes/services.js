@@ -41,13 +41,28 @@ router.post('/', protect, adminOrManager, upload.single('image'), async (req, re
   try {
     const { title, description, order } = req.body;
 
-    const titleObj = typeof title === 'string' ? JSON.parse(title) : title;
-    const descObj = typeof description === 'string' ? JSON.parse(description) : description;
+    let titleObj = { en: '', fr: '', ar: '' };
+    let descObj = { en: '', fr: '', ar: '' };
+    if (title) {
+      try {
+        titleObj = typeof title === 'string' ? JSON.parse(title) : title;
+      } catch (e) {
+        console.error('Create service title parse:', e);
+      }
+    }
+    if (description) {
+      try {
+        descObj = typeof description === 'string' ? JSON.parse(description) : description;
+      } catch (e) {
+        console.error('Create service description parse:', e);
+      }
+    }
 
+    const orderNum = order !== undefined && order !== '' ? Number(order) : 0;
     const serviceData = {
       title: titleObj,
       description: descObj,
-      order: order || 0
+      order: Number.isNaN(orderNum) ? 0 : orderNum
     };
 
     if (req.file) {
@@ -76,18 +91,27 @@ router.put('/:id', protect, adminOrManager, upload.single('image'), async (req, 
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    if (title) {
-      const titleObj = typeof title === 'string' ? JSON.parse(title) : title;
-      service.title = titleObj;
+    if (title !== undefined && title !== '') {
+      try {
+        const titleObj = typeof title === 'string' ? JSON.parse(title) : title;
+        service.title = titleObj;
+      } catch (e) {
+        console.error('Update service title parse:', e);
+      }
     }
 
-    if (description) {
-      const descObj = typeof description === 'string' ? JSON.parse(description) : description;
-      service.description = descObj;
+    if (description !== undefined && description !== '') {
+      try {
+        const descObj = typeof description === 'string' ? JSON.parse(description) : description;
+        service.description = descObj;
+      } catch (e) {
+        console.error('Update service description parse:', e);
+      }
     }
 
-    if (order !== undefined) {
-      service.order = order;
+    if (order !== undefined && order !== '') {
+      const num = Number(order);
+      if (!Number.isNaN(num)) service.order = num;
     }
 
     if (req.file) {

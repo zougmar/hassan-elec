@@ -62,11 +62,7 @@ const Contact = () => {
         data.append('image', formData.image);
       }
 
-      await api.post('/requests', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      await api.post('/requests', data);
 
       toast.success(t('contact.success'));
       setFormData({

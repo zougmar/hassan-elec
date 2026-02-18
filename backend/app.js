@@ -49,8 +49,9 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Serve uploaded files (local/dev only - Vercel has ephemeral storage)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve uploaded files: on Vercel use /tmp/uploads (writable), locally use backend/uploads
+const uploadsStaticDir = process.env.VERCEL ? '/tmp/uploads' : path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(uploadsStaticDir));
 
 // Routes
 app.use('/api/auth', authRoutes);
