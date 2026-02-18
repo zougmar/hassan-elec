@@ -154,28 +154,20 @@ const Home = () => {
           ) : (Array.isArray(services) ? services : []).length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {(Array.isArray(services) ? services : []).map((service) => (
-                <div key={service._id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="w-full h-48 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden relative">
+                <article key={service._id} className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl border border-slate-200/60 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden">
                     {service.image ? (
-                      <img
-                        src={getImageUrl(service.image)}
-                        alt={getLocalizedText(service.title, currentLang)}
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
+                      <img src={getImageUrl(service.image)} alt={getLocalizedText(service.title, currentLang)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.target.style.display = 'none'; }} />
                     ) : (
-                      <span className="text-slate-400 dark:text-slate-500 text-4xl">📷</span>
+                      <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500"><span className="text-5xl">📷</span></div>
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">
-                      {getLocalizedText(service.title, currentLang)}
-                    </h3>
-                    <p className="text-gray-600 line-clamp-3">
-                      {getLocalizedText(service.description, currentLang)}
-                    </p>
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5 tracking-tight">{getLocalizedText(service.title, currentLang)}</h3>
+                    <p className="text-slate-600 dark:text-slate-300 text-sm line-clamp-3">{getLocalizedText(service.description, currentLang)}</p>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           ) : (
@@ -208,28 +200,23 @@ const Home = () => {
           ) : (Array.isArray(projects) ? projects : []).length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {(Array.isArray(projects) ? projects : []).map((project) => (
-                <div key={project._id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="w-full h-48 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden relative">
+                <article key={project._id} className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl border border-slate-200/60 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden">
                     {project.images && project.images.length > 0 ? (
-                      <img
-                        src={getImageUrl(project.images[0])}
-                        alt={getLocalizedText(project.title, currentLang)}
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
+                      <img src={getImageUrl(project.images[0])} alt={getLocalizedText(project.title, currentLang)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.target.style.display = 'none'; }} />
                     ) : (
-                      <span className="text-slate-400 dark:text-slate-500 text-4xl">📷</span>
+                      <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500"><span className="text-5xl">📷</span></div>
                     )}
+                    {project.images && project.images.length > 1 && (
+                      <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-xs font-medium">+{project.images.length - 1}</span>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">
-                      {getLocalizedText(project.title, currentLang)}
-                    </h3>
-                    <p className="text-gray-600 line-clamp-3">
-                      {getLocalizedText(project.description, currentLang)}
-                    </p>
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5 tracking-tight">{getLocalizedText(project.title, currentLang)}</h3>
+                    <p className="text-slate-600 dark:text-slate-300 text-sm line-clamp-3">{getLocalizedText(project.description, currentLang)}</p>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           ) : (

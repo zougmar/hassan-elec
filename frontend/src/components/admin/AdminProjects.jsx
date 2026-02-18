@@ -4,6 +4,7 @@ import api from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUrl';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { ImageUploadMultiple } from '../ui/ImageUpload';
 
 const AdminProjects = () => {
   const { t, i18n } = useTranslation();
@@ -17,7 +18,7 @@ const AdminProjects = () => {
     category: 'general',
     images: []
   });
-  const [previews, setPreviews] = useState([]);
+  const [existingImageUrls, setExistingImageUrls] = useState([]);
 
   useEffect(() => {
     fetchProjects();
@@ -43,12 +44,7 @@ const AdminProjects = () => {
           [lang]: e.target.value
         }
       });
-    } else if (e.target.name === 'images') {
-      const files = Array.from(e.target.files);
-      setFormData({ ...formData, images: files });
-      const newPreviews = files.map(file => URL.createObjectURL(file));
-      setPreviews(newPreviews);
-    } else {
+    } else if (e.target.name !== 'images') {
       setFormData({ ...formData, [e.target.name]: e.target.value });
     }
   };
@@ -93,7 +89,7 @@ const AdminProjects = () => {
       category: project.category || 'general',
       images: []
     });
-    setPreviews(project.images?.map(img => getImageUrl(img)) || []);
+    setExistingImageUrls(project.images?.map(img => getImageUrl(img)) || []);
     setShowModal(true);
   };
 
@@ -117,7 +113,7 @@ const AdminProjects = () => {
       category: 'general',
       images: []
     });
-    setPreviews([]);
+    setExistingImageUrls([]);
     setEditingProject(null);
   };
 
@@ -149,36 +145,32 @@ const AdminProjects = () => {
       ) : projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <div key={project._id} className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-              {project.images && project.images.length > 0 && (
-                <img
-                  src={getImageUrl(project.images[0])}
-                  alt="Project"
-                  className="w-full h-48 object-cover"
-                />
-              )}
+            <div key={project._id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-md hover:shadow-lg transition-all duration-200">
+              <div className="relative aspect-video bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                {project.images && project.images.length > 0 ? (
+                  <img src={getImageUrl(project.images[0])} alt="Project" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-400"><span className="text-4xl">📷</span></div>
+                )}
+                {project.images?.length > 0 && (
+                  <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-xs font-medium">
+                    {project.images.length} {t('admin.images')}
+                  </span>
+                )}
+              </div>
               <div className="p-5">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   {project.title?.[i18n.language] || project.title?.en}
                 </h3>
-                <p className="text-slate-500 text-sm mb-2 line-clamp-2">
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">
                   {project.description?.[i18n.language] || project.description?.en}
                 </p>
-                <p className="text-xs text-slate-400 mb-4">
-                  {project.images?.length || 0} {t('admin.images')}
-                </p>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(project)}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors"
-                  >
+                  <button onClick={() => handleEdit(project)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors">
                     <Edit className="w-4 h-4" />
                     <span>{t('admin.edit')}</span>
                   </button>
-                  <button
-                    onClick={() => handleDelete(project._id)}
-                    className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
-                  >
+                  <button onClick={() => handleDelete(project._id)} className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-medium text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
                     <Trash2 className="w-4 h-4" />
                     <span>{t('admin.delete')}</span>
                   </button>
@@ -201,118 +193,86 @@ const AdminProjects = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="p-6 sm:p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {editingProject ? t('admin.edit') : t('admin.add')} {t('admin.projects')}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {languages.map((lang) => (
-                  <div key={lang} className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/60">
-                    <h3 className="font-semibold text-slate-700 mb-3 uppercase text-sm tracking-wide">{lang}</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                          {t('admin.title')} ({lang})
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.title[lang] || ''}
-                          onChange={(e) => handleChange(e, lang)}
-                          name="title"
-                          required
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                          {t('admin.description')} ({lang})
-                        </label>
-                        <textarea
-                          value={formData.description[lang] || ''}
-                          onChange={(e) => handleChange(e, lang)}
-                          name="description"
-                          required
-                          rows={3}
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none"
-                        />
-                      </div>
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                {editingProject ? t('admin.edit') : t('admin.add')} {t('admin.projects')}
+              </h2>
+              <button
+                onClick={() => { setShowModal(false); resetForm(); }}
+                className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+              {languages.map((lang) => (
+                <div key={lang} className="rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 p-4">
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 uppercase text-xs tracking-wider">{lang}</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">{t('admin.title')}</label>
+                      <input
+                        type="text"
+                        value={formData.title[lang] || ''}
+                        onChange={(e) => handleChange(e, lang)}
+                        name="title"
+                        required
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">{t('admin.description')}</label>
+                      <textarea
+                        value={formData.description[lang] || ''}
+                        onChange={(e) => handleChange(e, lang)}
+                        name="description"
+                        required
+                        rows={3}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all resize-none"
+                      />
                     </div>
                   </div>
-                ))}
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    {t('admin.category')}
-                  </label>
-                  <input
-                    type="text"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-                  />
                 </div>
+              ))}
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    {t('admin.images')}
-                  </label>
-                  <input
-                    type="file"
-                    name="images"
-                    accept="image/*"
-                    multiple
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-                  />
-                  {previews.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 mt-3">
-                      {previews.map((preview, index) => (
-                        <img
-                          key={index}
-                          src={preview}
-                          alt="Preview"
-                          className="w-full h-24 object-cover rounded-xl border border-slate-200"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('admin.category')}</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  placeholder="e.g. general, residential, commercial"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
+                />
+              </div>
 
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 rounded-xl font-semibold text-white bg-primary-700 hover:bg-primary-600 transition-colors"
-                  >
-                    {t('admin.save')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowModal(false);
-                      resetForm();
-                    }}
-                    className="flex-1 py-3 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
-                  >
-                    {t('admin.cancel')}
-                  </button>
-                </div>
-              </form>
-            </div>
+              <ImageUploadMultiple
+                label={t('admin.images')}
+                value={formData.images}
+                onChange={(files) => setFormData({ ...formData, images: files })}
+                previewUrls={editingProject ? existingImageUrls : []}
+                max={10}
+              />
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500/30 transition-colors"
+                >
+                  {t('admin.save')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowModal(false); resetForm(); }}
+                  className="flex-1 py-3 rounded-xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  {t('admin.cancel')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

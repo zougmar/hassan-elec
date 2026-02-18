@@ -44,33 +44,34 @@ const Services = () => {
         ) : services.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service) => (
-              <div
+              <article
                 key={service._id}
-                className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+                className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl border border-slate-200/60 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="w-full h-64 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden relative">
+                <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden">
                   {service.image ? (
                     <img
                       src={getImageUrl(service.image)}
                       alt={getLocalizedText(service.title, currentLang)}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <span className="text-slate-400 dark:text-slate-500 text-4xl">📷</span>
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
+                      <span className="text-5xl">📷</span>
+                    </div>
                   )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-semibold mb-3">
+                <div className="p-6 sm:p-7">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
                     {getLocalizedText(service.title, currentLang)}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-4">
                     {getLocalizedText(service.description, currentLang)}
                   </p>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         ) : (
