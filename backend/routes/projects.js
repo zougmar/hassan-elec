@@ -1,9 +1,23 @@
 import express from 'express';
 import Project from '../models/Project.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
-import { upload } from '../middleware/upload.js';
+import { upload, useMemoryStorage } from '../middleware/upload.js';
+import { uploadBuffer, isCloudinaryConfigured } from '../utils/cloudinary.js';
 
 const router = express.Router();
+
+/** When using Cloudinary, upload buffers and return URLs; otherwise return /uploads paths. */
+async function resolveImageUrls(files) {
+  if (useMemoryStorage && isCloudinaryConfigured && files[0]?.buffer) {
+    const urls = [];
+    for (const file of files) {
+      const url = await uploadBuffer(file.buffer, file.mimetype, 'hassan-elec/projects');
+      if (url) urls.push(url);
+    }
+    return urls;
+  }
+  return files.map(file => `/uploads/${file.filename}`);
+}
 
 // @route   GET /api/projects
 // @desc    Get all projects
@@ -40,10 +54,22 @@ router.get('/:id', async (req, res) => {
 router.post('/', protect, adminOrManager, upload.array('images', 10), async (req, res) => {
   try {
     const { title, description, category } = req.body;
-
-    const titleObj = typeof title === 'string' ? JSON.parse(title) : title;
-    const descObj = typeof description === 'string' ? JSON.parse(description) : description;
-
+    let titleObj = { en: '', fr: '', ar: '' };
+    let descObj = { en: '', fr: '', ar: '' };
+    if (title) {
+      try {
+        titleObj = typeof title === 'string' ? JSON.parse(title) : title;
+      } catch (e) {
+        console.error('Create project title parse:', e);
+      }
+    }
+    if (description) {
+      try {
+        descObj = typeof description === 'string' ? JSON.parse(description) : description;
+      } catch (e) {
+        console.error('Create project description parse:', e);
+      }
+    }
     const projectData = {
       title: titleObj,
       description: descObj,
@@ -52,7 +78,7 @@ router.post('/', protect, adminOrManager, upload.array('images', 10), async (req
     };
 
     if (req.files && req.files.length > 0) {
-      projectData.images = req.files.map(file => `/uploads/${file.filename}`);
+      projectData.images = await resolveImageUrls(req.files);
     }
 
     const project = new Project(projectData);
@@ -77,14 +103,21 @@ router.put('/:id', protect, adminOrManager, upload.array('images', 10), async (r
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    if (title) {
-      const titleObj = typeof title === 'string' ? JSON.parse(title) : title;
-      project.title = titleObj;
+    if (title !== undefined && title !== '') {
+      try {
+        const titleObj = typeof title === 'string' ? JSON.parse(title) : title;
+        project.title = titleObj;
+      } catch (e) {
+        console.error('Update project title parse:', e);
+      }
     }
-
-    if (description) {
-      const descObj = typeof description === 'string' ? JSON.parse(description) : description;
-      project.description = descObj;
+    if (description !== undefined && description !== '') {
+      try {
+        const descObj = typeof description === 'string' ? JSON.parse(description) : description;
+        project.description = descObj;
+      } catch (e) {
+        console.error('Update project description parse:', e);
+      }
     }
 
     if (category) {
@@ -92,7 +125,7 @@ router.put('/:id', protect, adminOrManager, upload.array('images', 10), async (r
     }
 
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => `/uploads/${file.filename}`);
+      const newImages = await resolveImageUrls(req.files);
       project.images = [...project.images, ...newImages];
     }
 

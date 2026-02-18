@@ -2,20 +2,23 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { isCloudinaryConfigured } from '../utils/cloudinary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// On Vercel, filesystem is read-only except /tmp; use /tmp for uploads there
+// When Cloudinary is configured (e.g. on Vercel), use memory so we can upload to Cloudinary.
+// Otherwise use disk (or /tmp on Vercel if Cloudinary not set).
+const useMemoryStorage = isCloudinaryConfigured;
+
 const uploadsDir = process.env.VERCEL
   ? path.join('/tmp', 'uploads')
   : path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
+if (!useMemoryStorage && !fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure storage
-const storage = multer.diskStorage({
+const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
   },
@@ -24,6 +27,8 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
+
+const storage = useMemoryStorage ? multer.memoryStorage() : diskStorage;
 
 // File filter
 const fileFilter = (req, file, cb) => {
@@ -39,9 +44,11 @@ const fileFilter = (req, file, cb) => {
 };
 
 export const upload = multer({
-  storage: storage,
+  storage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB
   },
   fileFilter: fileFilter
 });
+
+export { useMemoryStorage };

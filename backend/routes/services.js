@@ -1,9 +1,18 @@
 import express from 'express';
 import Service from '../models/Service.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
-import { upload } from '../middleware/upload.js';
+import { upload, useMemoryStorage } from '../middleware/upload.js';
+import { uploadBuffer, isCloudinaryConfigured } from '../utils/cloudinary.js';
 
 const router = express.Router();
+
+async function resolveImageUrl(file, folder = 'hassan-elec') {
+  if (useMemoryStorage && isCloudinaryConfigured && file.buffer) {
+    const url = await uploadBuffer(file.buffer, file.mimetype, folder);
+    if (url) return url;
+  }
+  return `/uploads/${file.filename}`;
+}
 
 // @route   GET /api/services
 // @desc    Get all services
@@ -66,7 +75,7 @@ router.post('/', protect, adminOrManager, upload.single('image'), async (req, re
     };
 
     if (req.file) {
-      serviceData.image = `/uploads/${req.file.filename}`;
+      serviceData.image = await resolveImageUrl(req.file, 'hassan-elec/services');
     }
 
     const service = new Service(serviceData);
@@ -115,7 +124,7 @@ router.put('/:id', protect, adminOrManager, upload.single('image'), async (req, 
     }
 
     if (req.file) {
-      service.image = `/uploads/${req.file.filename}`;
+      service.image = await resolveImageUrl(req.file, 'hassan-elec/services');
     }
 
     await service.save();

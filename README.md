@@ -212,6 +212,10 @@ The built files will be in `frontend/dist/`
 - `UPLOAD_PATH` - Path for uploaded files
 - `ADMIN_EMAIL` - Default admin email
 - `ADMIN_PASSWORD` - Default admin password
+- **Cloudinary (recommended for Vercel/production)** – so uploaded images persist (no disappearing after refresh):
+  - `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
+  - `CLOUDINARY_API_KEY` - Cloudinary API key
+  - `CLOUDINARY_API_SECRET` - Cloudinary API secret
 
 ### Frontend (.env)
 - `VITE_API_URL` - Backend API URL
@@ -234,10 +238,11 @@ The built files will be in `frontend/dist/`
 - Touch-friendly interface
 
 ### Image Handling
-- Local file uploads stored in `backend/uploads`
+- Local file uploads stored in `backend/uploads` (or `/tmp` on Vercel without Cloudinary)
+- **Production (Vercel):** Set Cloudinary env vars so images are stored in the cloud and persist after refresh
 - Image preview before upload
 - Multiple images for projects
-- Automatic image serving via Express static middleware
+- Automatic image serving via Express static middleware (or Cloudinary URLs when configured)
 
 ## Troubleshooting
 

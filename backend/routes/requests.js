@@ -1,9 +1,18 @@
 import express from 'express';
 import Request from '../models/Request.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
-import { upload } from '../middleware/upload.js';
+import { upload, useMemoryStorage } from '../middleware/upload.js';
+import { uploadBuffer, isCloudinaryConfigured } from '../utils/cloudinary.js';
 
 const router = express.Router();
+
+async function resolveImageUrl(file, folder = 'hassan-elec') {
+  if (useMemoryStorage && isCloudinaryConfigured && file.buffer) {
+    const url = await uploadBuffer(file.buffer, file.mimetype, folder);
+    if (url) return url;
+  }
+  return `/uploads/${file.filename}`;
+}
 
 // @route   GET /api/requests
 // @desc    Get all requests
@@ -77,7 +86,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     };
 
     if (req.file) {
-      requestData.image = `/uploads/${req.file.filename}`;
+      requestData.image = await resolveImageUrl(req.file, 'hassan-elec/requests');
     }
 
     const newRequest = new Request(requestData);
