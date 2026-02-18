@@ -13,11 +13,8 @@ export const getImageUrl = (imagePath) => {
   const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 
   if (typeof window !== 'undefined') {
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    // Local dev: uploads are on the backend (e.g. :5000), not Vite (:5173)
-    const origin = isLocalDev
-      ? (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '').replace(/\/$/, '')
-      : window.location.origin.replace(/\/$/, '');
+    // Use current origin so: in dev /uploads is proxied to backend (vite.config), in prod same origin serves API & uploads
+    const origin = window.location.origin.replace(/\/$/, '');
     return `${origin}${path}`;
   }
 
