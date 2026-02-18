@@ -2,15 +2,18 @@
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return '';
   
-  // If it's already a full URL, return as is
+  // If it's already a full URL (e.g. Cloudinary), return as is
   if (imagePath.startsWith('http')) {
     return imagePath;
   }
   
-  // Relative path (e.g. /uploads/xxx): always use current origin so preview and production
-  // each load images from their own deployment (avoids CORS and wrong origin).
+  // Relative path (e.g. /uploads/xxx)
   if (typeof window !== 'undefined' && imagePath.startsWith('/')) {
-    const origin = window.location.origin.replace(/\/$/, '');
+    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // In local dev, uploads are served by the backend (e.g. :5000), not Vite (:5173). Use backend origin.
+    const origin = isLocalDev
+      ? (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '')
+      : window.location.origin.replace(/\/$/, '');
     return `${origin}${imagePath}`;
   }
   
