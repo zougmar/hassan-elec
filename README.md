@@ -256,6 +256,14 @@ The built files will be in `frontend/dist/`
 - Check file permissions
 - Verify file size (max 5MB)
 
+### Images not showing in admin cards on Vercel
+- On Vercel, the server filesystem is temporary. Uploaded images are stored in `/tmp` and are **not persistent**, so they often don’t load (you may see a placeholder).
+- **Fix:** In the Vercel project, go to **Settings → Environment Variables** and add:
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
+- Then **redeploy**. New uploads will be stored in Cloudinary and will display correctly in project and service cards.
+
 ### CORS Errors
 - Backend CORS is configured for all origins
 - For production, update CORS settings in `server.js`

@@ -147,10 +147,16 @@ const AdminProjects = () => {
           {projects.map((project) => (
             <div key={project._id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-md hover:shadow-lg transition-all duration-200">
               <div className="relative aspect-video bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                {project.images && project.images.length > 0 ? (
-                  <img src={getImageUrl(project.images[0])} alt="Project" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400"><span className="text-4xl">📷</span></div>
+                <div className="absolute inset-0 flex items-center justify-center text-slate-400 z-0">
+                  <span className="text-4xl">📷</span>
+                </div>
+                {project.images && project.images.length > 0 && (
+                  <img
+                    src={getImageUrl(project.images[0])}
+                    alt="Project"
+                    className="relative z-10 w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
                 )}
                 {project.images?.length > 0 && (
                   <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-xs font-medium">
