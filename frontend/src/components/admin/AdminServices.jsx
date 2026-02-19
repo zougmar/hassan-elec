@@ -60,16 +60,26 @@ const AdminServices = () => {
         data.append('image', formData.image);
       }
 
+      let saved;
       if (editingService) {
-        await api.put(`/services/${editingService._id}`, data);
+        const res = await api.put(`/services/${editingService._id}`, data);
+        saved = res.data;
         toast.success(t('admin.saved'));
       } else {
-        await api.post('/services', data);
+        const res = await api.post('/services', data);
+        saved = res.data;
         toast.success(t('admin.saved'));
       }
 
       setShowModal(false);
       resetForm();
+      if (saved) {
+        setServices((prev) =>
+          editingService
+            ? prev.map((s) => (s._id === saved._id ? saved : s))
+            : [saved, ...prev]
+        );
+      }
       fetchServices();
     } catch (error) {
       console.error('Error saving service:', error);
@@ -143,18 +153,29 @@ const AdminServices = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => (
             <div key={service._id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-md hover:shadow-lg transition-all duration-200">
-              <div className="aspect-video bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                {service.image ? (
-                  <img src={getImageUrl(service.image)} alt="Service" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400"><span className="text-4xl">📷</span></div>
+              <div className="relative aspect-video bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center text-slate-400 z-0">
+                  <span className="text-4xl">📷</span>
+                </div>
+                {service.image && (
+                  <img
+                    src={getImageUrl(service.image)}
+                    alt={service.title?.[i18n.language] || service.title?.en || 'Service'}
+                    className="relative z-10 w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                )}
+                {service.order != null && (
+                  <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-xs font-medium">
+                    #{service.order}
+                  </span>
                 )}
               </div>
               <div className="p-5">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   {service.title?.[i18n.language] || service.title?.en}
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-3">
                   {service.description?.[i18n.language] || service.description?.en}
                 </p>
                 <div className="flex gap-2">

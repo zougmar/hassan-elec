@@ -2,13 +2,20 @@ import express from 'express';
 import Request from '../models/Request.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
 import { upload, useMemoryStorage } from '../middleware/upload.js';
-import { uploadBuffer, isCloudinaryConfigured } from '../utils/cloudinary.js';
+import { uploadBuffer as uploadToCloudinary, isCloudinaryConfigured } from '../utils/cloudinary.js';
+import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
 
 const router = express.Router();
 
 async function resolveImageUrl(file, folder = 'hassan-elec') {
-  if (useMemoryStorage && isCloudinaryConfigured && file.buffer) {
-    const url = await uploadBuffer(file.buffer, file.mimetype, folder);
+  if (useMemoryStorage && file.buffer) {
+    let url = null;
+    if (isCloudinaryConfigured) {
+      url = await uploadToCloudinary(file.buffer, file.mimetype, folder);
+    }
+    if (!url && isBlobConfigured) {
+      url = await uploadBufferToBlob(file.buffer, file.mimetype, folder);
+    }
     if (url) return url;
   }
   return `/uploads/${file.filename}`;

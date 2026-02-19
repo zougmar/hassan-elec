@@ -2,19 +2,26 @@ import express from 'express';
 import Project from '../models/Project.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
 import { upload, useMemoryStorage } from '../middleware/upload.js';
-import { uploadBuffer, isCloudinaryConfigured } from '../utils/cloudinary.js';
+import { uploadBuffer as uploadToCloudinary, isCloudinaryConfigured } from '../utils/cloudinary.js';
+import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
 
 const router = express.Router();
 
-/** When using Cloudinary, upload buffers and return URLs; otherwise return /uploads paths. */
+/** Upload to Cloudinary or Vercel Blob when configured; otherwise return /uploads paths. */
 async function resolveImageUrls(files) {
-  if (useMemoryStorage && isCloudinaryConfigured && files[0]?.buffer) {
+  if (useMemoryStorage && files[0]?.buffer) {
     const urls = [];
     for (const file of files) {
-      const url = await uploadBuffer(file.buffer, file.mimetype, 'hassan-elec/projects');
+      let url = null;
+      if (isCloudinaryConfigured) {
+        url = await uploadToCloudinary(file.buffer, file.mimetype, 'hassan-elec/projects');
+      }
+      if (!url && isBlobConfigured) {
+        url = await uploadBufferToBlob(file.buffer, file.mimetype, 'hassan-elec/projects');
+      }
       if (url) urls.push(url);
     }
-    return urls;
+    if (urls.length > 0) return urls;
   }
   return files.map(file => `/uploads/${file.filename}`);
 }

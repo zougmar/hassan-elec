@@ -3,13 +3,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { isCloudinaryConfigured } from '../utils/cloudinary.js';
+import { isBlobConfigured } from '../utils/blob.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// When Cloudinary is configured (e.g. on Vercel), use memory so we can upload to Cloudinary.
-// Otherwise use disk (or /tmp on Vercel if Cloudinary not set).
-const useMemoryStorage = isCloudinaryConfigured;
+// When Cloudinary or Vercel Blob is configured, use memory storage so we can upload to remote storage.
+// Otherwise use disk (or /tmp on Vercel, which is ephemeral).
+const useMemoryStorage = isCloudinaryConfigured || isBlobConfigured;
 
 const uploadsDir = process.env.VERCEL
   ? path.join('/tmp', 'uploads')

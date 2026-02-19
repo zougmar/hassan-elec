@@ -63,16 +63,26 @@ const AdminProjects = () => {
         });
       }
 
+      let saved;
       if (editingProject) {
-        await api.put(`/projects/${editingProject._id}`, data);
+        const res = await api.put(`/projects/${editingProject._id}`, data);
+        saved = res.data;
         toast.success(t('admin.saved'));
       } else {
-        await api.post('/projects', data);
+        const res = await api.post('/projects', data);
+        saved = res.data;
         toast.success(t('admin.saved'));
       }
 
       setShowModal(false);
       resetForm();
+      if (saved) {
+        setProjects((prev) =>
+          editingProject
+            ? prev.map((p) => (p._id === saved._id ? saved : p))
+            : [saved, ...prev]
+        );
+      }
       fetchProjects();
     } catch (error) {
       console.error('Error saving project:', error);
@@ -165,10 +175,17 @@ const AdminProjects = () => {
                 )}
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                  {project.title?.[i18n.language] || project.title?.en}
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex-1">
+                    {project.title?.[i18n.language] || project.title?.en}
+                  </h3>
+                  {project.category && (
+                    <span className="px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-xs font-medium">
+                      {project.category}
+                    </span>
+                  )}
+                </div>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-3">
                   {project.description?.[i18n.language] || project.description?.en}
                 </p>
                 <div className="flex gap-2">

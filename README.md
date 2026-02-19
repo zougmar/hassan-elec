@@ -212,10 +212,11 @@ The built files will be in `frontend/dist/`
 - `UPLOAD_PATH` - Path for uploaded files
 - `ADMIN_EMAIL` - Default admin email
 - `ADMIN_PASSWORD` - Default admin password
-- **Cloudinary (recommended for Vercel/production)** – so uploaded images persist (no disappearing after refresh):
-  - `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
-  - `CLOUDINARY_API_KEY` - Cloudinary API key
-  - `CLOUDINARY_API_SECRET` - Cloudinary API secret
+- **Vercel Blob (recommended for Vercel)** – so uploaded images persist and display in admin/public cards:
+  - Create a Blob store in your Vercel project: **Storage** tab → **Create Database** → **Blob**. The `BLOB_READ_WRITE_TOKEN` env var is added automatically.
+  - No other env vars needed; redeploy and new uploads will persist.
+- **Optional – Cloudinary** – alternative to Blob if you prefer:
+  - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 
 ### Frontend (.env)
 - `VITE_API_URL` - Backend API URL
@@ -238,11 +239,11 @@ The built files will be in `frontend/dist/`
 - Touch-friendly interface
 
 ### Image Handling
-- Local file uploads stored in `backend/uploads` (or `/tmp` on Vercel without Cloudinary)
-- **Production (Vercel):** Set Cloudinary env vars so images are stored in the cloud and persist after refresh
+- Local file uploads stored in `backend/uploads` (or `/tmp` on Vercel if no Blob)
+- **Production (Vercel):** Add a Blob store in the project so images persist in Vercel Blob (no Cloudinary required)
 - Image preview before upload
 - Multiple images for projects
-- Automatic image serving via Express static middleware (or Cloudinary URLs when configured)
+- Automatic image serving via Express static middleware or stored Blob/Cloudinary URLs
 
 ## Troubleshooting
 
@@ -257,12 +258,8 @@ The built files will be in `frontend/dist/`
 - Verify file size (max 5MB)
 
 ### Images not showing in admin cards on Vercel
-- On Vercel, the server filesystem is temporary. Uploaded images are stored in `/tmp` and are **not persistent**, so they often don’t load (you may see a placeholder).
-- **Fix:** In the Vercel project, go to **Settings → Environment Variables** and add:
-  - `CLOUDINARY_CLOUD_NAME`
-  - `CLOUDINARY_API_KEY`
-  - `CLOUDINARY_API_SECRET`
-- Then **redeploy**. New uploads will be stored in Cloudinary and will display correctly in project and service cards.
+- On Vercel, the server filesystem is temporary (`/tmp`), so uploads there don’t persist and images may not load.
+- **Fix (no Cloudinary needed):** In the Vercel project, open the **Storage** tab → **Create Database** → choose **Blob** → create a Blob store. This adds `BLOB_READ_WRITE_TOKEN` automatically. **Redeploy** the project. New uploads will be stored in Vercel Blob and will display in project and service cards.
 
 ### CORS Errors
 - Backend CORS is configured for all origins
