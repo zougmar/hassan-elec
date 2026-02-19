@@ -14,6 +14,7 @@ import departmentRoutes from './routes/departments.js';
 import managerRoutes from './routes/managers.js';
 import employeeRoutes from './routes/employees.js';
 import taskRoutes from './routes/tasks.js';
+import profileRoutes from './routes/profile.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,6 +66,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/managers', managerRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

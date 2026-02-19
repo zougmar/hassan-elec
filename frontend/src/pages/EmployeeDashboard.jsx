@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import {
@@ -16,11 +16,14 @@ import {
   Sparkles
 } from 'lucide-react';
 import logoDark2 from '../images/logo/dark2.webp';
+import { getImageUrl } from '../utils/imageUrl';
+import AdminProfile from '../components/admin/AdminProfile';
 
 const EmployeeDashboard = () => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
@@ -134,10 +137,21 @@ const EmployeeDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-              <User className="w-4 h-4" />
-              <span className="text-sm font-medium">Employee</span>
-            </div>
+            <Link
+              to="/employee/profile"
+              className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+                {user?.photo ? (
+                  <img src={getImageUrl(user.photo)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-slate-500" />
+                  </div>
+                )}
+              </div>
+              <span className="text-sm font-medium truncate max-w-[120px] hidden sm:inline">{user?.name || user?.email}</span>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all duration-200 font-medium text-sm"
@@ -150,6 +164,10 @@ const EmployeeDashboard = () => {
       </header>
 
       <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto">
+        <Routes>
+          <Route path="profile" element={<AdminProfile />} />
+          <Route index element={
+        <>
         {/* Welcome & Stats */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
@@ -311,6 +329,9 @@ const EmployeeDashboard = () => {
             })}
           </div>
         )}
+        </>
+          } />
+        </Routes>
       </main>
     </div>
   );

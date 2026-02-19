@@ -16,7 +16,8 @@ import {
   Layers,
   Users,
   ListTodo,
-  UserCog
+  UserCog,
+  User
 } from 'lucide-react';
 import logoDark2 from '../images/logo/dark2.webp';
 
@@ -30,6 +31,8 @@ import AdminDepartments from '../components/admin/AdminDepartments';
 import AdminEmployees from '../components/admin/AdminEmployees';
 import AdminManagers from '../components/admin/AdminManagers';
 import AdminTasks from '../components/admin/AdminTasks';
+import AdminProfile from '../components/admin/AdminProfile';
+import { getImageUrl } from '../utils/imageUrl';
 
 const AdminDashboard = () => {
   const { t, i18n } = useTranslation();
@@ -48,6 +51,7 @@ const AdminDashboard = () => {
 
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
+    { path: '/admin/profile', icon: User, label: t('admin.profile') },
     ...(isAdmin ? [{ path: '/admin/services', icon: Wrench, label: t('admin.services') }] : []),
     ...(isAdmin ? [{ path: '/admin/projects', icon: FolderKanban, label: t('admin.projects') }] : []),
     ...(isAdmin ? [{ path: '/admin/requests', icon: MessageSquare, label: t('admin.requests') }] : []),
@@ -126,8 +130,27 @@ const AdminDashboard = () => {
             })}
           </nav>
 
-          {/* Logout */}
+          {/* Profile block above logout */}
           <div className="p-4 border-t border-slate-800/50">
+            <Link
+              to="/admin/profile"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800/50 hover:text-white border border-transparent transition-all duration-200 mb-2"
+            >
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-700 overflow-hidden ring-2 ring-slate-600">
+                {user?.photo ? (
+                  <img src={getImageUrl(user.photo)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-400">
+                    <User className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium truncate">{user?.name || user?.email || 'Profile'}</p>
+                <p className="text-xs text-slate-500 truncate">{t('admin.profile')}</p>
+              </div>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 border border-transparent transition-all duration-200"
@@ -159,6 +182,7 @@ const AdminDashboard = () => {
               <Route path="/employees" element={<AdminEmployees />} />
               <Route path="/tasks" element={<AdminTasks />} />
               <Route path="/managers" element={<AdminManagers />} />
+              <Route path="profile" element={<AdminProfile />} />
             </Routes>
           </div>
         </main>
