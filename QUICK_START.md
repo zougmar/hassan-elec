@@ -72,6 +72,40 @@ This creates:
   - Email: employee@hassan-elec.com (after running seed)
   - Password: employee123
 
+## Deploy on Vercel (frontend + backend on one URL)
+
+This repo is set up so **one Vercel project** serves both the frontend and the API:
+
+1. Push the code to GitHub and import the repo in Vercel.
+2. Vercel builds the frontend and deploys the API at **the same domain** (e.g. `https://hassan-elec.vercel.app`).
+3. The frontend automatically uses **`/api`** on that domain, so no extra URL config is needed.
+
+**Environment variables in Vercel (Project → Settings → Environment Variables):**
+
+| Variable | Value |
+|----------|--------|
+| `MONGODB_URI` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | A long random secret (min 32 chars) |
+| `JWT_EXPIRE` | `7d` |
+| `ADMIN_EMAIL` | (optional) Admin login email |
+| `ADMIN_PASSWORD` | (optional) Admin login password |
+
+**Do not set** `VITE_API_URL` for this setup — the app uses the same URL for the site and the API.
+
+---
+
+## Vercel: frontend and backend on different URLs
+
+If you deploy the **backend** as a separate Vercel project (e.g. `https://hassan-elec-api.vercel.app`):
+
+1. In the **frontend** Vercel project, add:
+   - **`VITE_API_URL`** = `https://hassan-elec-api.vercel.app/api` (your backend URL + `/api`)
+2. Redeploy the frontend so the build picks up `VITE_API_URL`.
+
+The frontend will then call your backend at that URL.
+
+---
+
 ## Next Steps
 
 1. Change admin credentials after first login

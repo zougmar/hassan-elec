@@ -1,11 +1,16 @@
 import axios from 'axios';
 
-// Resolve API base URL: use relative /api when deployed (same origin). Only use full URL in dev.
+// Resolve API base URL for axios.
+// - Local dev: use VITE_API_URL or http://localhost:5000/api
+// - Vercel (same project): use /api (frontend and API on same domain)
+// - Vercel (separate backend URL): set VITE_API_URL to your backend URL, e.g. https://your-api.vercel.app/api
 function getApiBaseUrl() {
   const envUrl = import.meta.env.VITE_API_URL;
   const isDev = import.meta.env.DEV;
-  // If we're in the browser and not on localhost, never use localhost — use same-origin /api (Vercel).
-  if (typeof window !== 'undefined' && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1') {
+  if (typeof window !== 'undefined') {
+    const isLocalhost = window.location?.hostname === 'localhost' || window.location?.hostname === '127.0.0.1';
+    if (isLocalhost) return envUrl || (isDev ? 'http://localhost:5000/api' : '/api');
+    if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) return envUrl;
     return '/api';
   }
   return envUrl || (isDev ? 'http://localhost:5000/api' : '/api');
