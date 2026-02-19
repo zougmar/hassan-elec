@@ -52,6 +52,8 @@ app.use(async (req, res, next) => {
 // Serve uploaded files: on Vercel use /tmp/uploads (writable), locally use backend/uploads
 const uploadsStaticDir = process.env.VERCEL ? '/tmp/uploads' : path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadsStaticDir));
+// Vercel rewrites /uploads/* to /api/uploads/* so the serverless function receives this path
+app.use('/api/uploads', express.static(uploadsStaticDir));
 
 // Routes
 app.use('/api/auth', authRoutes);

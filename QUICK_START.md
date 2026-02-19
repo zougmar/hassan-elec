@@ -92,6 +92,20 @@ This repo is set up so **one Vercel project** serves both the frontend and the A
 
 **Do not set** `VITE_API_URL` for this setup — the app uses the same URL for the site and the API.
 
+**If login fails on Vercel:**
+
+1. **Set env vars** in Vercel → Project → Settings → Environment Variables:
+   - `MONGODB_URI` — your MongoDB Atlas (or other) connection string.
+   - `JWT_SECRET` — a long random string (e.g. 32+ characters).
+2. **Seed the production database** so admin/manager users exist. From your machine (with the same `MONGODB_URI` as on Vercel), run:
+   ```bash
+   cd backend
+   # Ensure .env has MONGODB_URI equal to the one in Vercel (e.g. Atlas URI)
+   npm run seed
+   ```
+   Then use **manager@hassan-elec.com** / **manager123** (or **supervisor@hassan-elec.com** / **supervisor123**) to log in.
+3. **Redeploy** after changing env vars so the API uses them.
+
 ---
 
 ## Vercel: frontend and backend on different URLs
@@ -116,6 +130,7 @@ The frontend will then call your backend at that URL.
 
 ## Troubleshooting
 
-- **MongoDB not connecting**: Make sure MongoDB is running
-- **Port already in use**: Change PORT in backend `.env`
-- **Images not loading**: Check that `uploads` folder exists in backend
+- **MongoDB not connecting**: Make sure MongoDB is running (or use Atlas and set `MONGODB_URI`).
+- **Port already in use**: Change PORT in backend `.env`.
+- **Images not loading**: Check that `uploads` folder exists in backend (or set up Vercel Blob and `BLOB_READ_WRITE_TOKEN`).
+- **Login failed on Vercel**: Set `MONGODB_URI` and `JWT_SECRET` in Vercel env, run `npm run seed` in backend using the **same** MongoDB URI so users exist, then redeploy.
