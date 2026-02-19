@@ -7,6 +7,22 @@ import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
 
 const router = express.Router();
 
+function isImageUrl(str) {
+  return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://')) && str.trim().length > 0;
+}
+
+/** Parse imageUrls from body (JSON array of strings). Returns array of valid URLs. */
+function parseImageUrlsFromBody(body) {
+  if (!body?.imageUrls) return [];
+  try {
+    const parsed = typeof body.imageUrls === 'string' ? JSON.parse(body.imageUrls) : body.imageUrls;
+    const arr = Array.isArray(parsed) ? parsed : [];
+    return arr.filter((u) => isImageUrl(u)).map((u) => u.trim());
+  } catch {
+    return [];
+  }
+}
+
 /** Upload to Cloudinary or Vercel Blob when configured; otherwise return /uploads paths. */
 async function resolveImageUrls(files) {
   if (useMemoryStorage && files[0]?.buffer) {
@@ -84,8 +100,11 @@ router.post('/', protect, adminOrManager, upload.array('images', 10), async (req
       images: []
     };
 
+    const urlImages = parseImageUrlsFromBody(req.body);
+    if (urlImages.length > 0) projectData.images.push(...urlImages);
     if (req.files && req.files.length > 0) {
-      projectData.images = await resolveImageUrls(req.files);
+      const fileUrls = await resolveImageUrls(req.files);
+      projectData.images.push(...fileUrls);
     }
 
     const project = new Project(projectData);
@@ -131,9 +150,11 @@ router.put('/:id', protect, adminOrManager, upload.array('images', 10), async (r
       project.category = category;
     }
 
+    const urlImages = parseImageUrlsFromBody(req.body);
+    if (urlImages.length > 0) project.images.push(...urlImages);
     if (req.files && req.files.length > 0) {
       const newImages = await resolveImageUrls(req.files);
-      project.images = [...project.images, ...newImages];
+      project.images.push(...newImages);
     }
 
     await project.save();

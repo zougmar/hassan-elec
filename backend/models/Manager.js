@@ -7,6 +7,7 @@ const managerSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  photo: { type: String, default: '' },
   email: {
     type: String,
     required: true,

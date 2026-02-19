@@ -7,6 +7,10 @@ import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
 
 const router = express.Router();
 
+function isImageUrl(str) {
+  return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://')) && str.trim().length > 0;
+}
+
 async function resolveImageUrl(file, folder = 'hassan-elec') {
   if (useMemoryStorage && file.buffer) {
     let url = null;
@@ -81,7 +85,9 @@ router.post('/', protect, adminOrManager, upload.single('image'), async (req, re
       order: Number.isNaN(orderNum) ? 0 : orderNum
     };
 
-    if (req.file) {
+    if (isImageUrl(req.body?.imageUrl)) {
+      serviceData.image = req.body.imageUrl.trim();
+    } else if (req.file) {
       serviceData.image = await resolveImageUrl(req.file, 'hassan-elec/services');
     }
 
@@ -130,7 +136,9 @@ router.put('/:id', protect, adminOrManager, upload.single('image'), async (req, 
       if (!Number.isNaN(num)) service.order = num;
     }
 
-    if (req.file) {
+    if (isImageUrl(req.body?.imageUrl)) {
+      service.image = req.body.imageUrl.trim();
+    } else if (req.file) {
       service.image = await resolveImageUrl(req.file, 'hassan-elec/services');
     }
 

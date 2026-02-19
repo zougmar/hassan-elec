@@ -16,7 +16,8 @@ const AdminProjects = () => {
     title: { en: '', fr: '', ar: '' },
     description: { en: '', fr: '', ar: '' },
     category: 'general',
-    images: []
+    images: [],
+    imageUrls: ''
   });
   const [existingImageUrls, setExistingImageUrls] = useState([]);
 
@@ -56,11 +57,18 @@ const AdminProjects = () => {
       data.append('title', JSON.stringify(formData.title));
       data.append('description', JSON.stringify(formData.description));
       data.append('category', formData.category);
-      
+
+      const urlsFromText = formData.imageUrls
+        ? formData.imageUrls
+            .split(/[\n,]+/)
+            .map((u) => u.trim())
+            .filter((u) => u && (u.startsWith('http://') || u.startsWith('https://')))
+        : [];
+      if (urlsFromText.length > 0) {
+        data.append('imageUrls', JSON.stringify(urlsFromText));
+      }
       if (formData.images.length > 0) {
-        formData.images.forEach(image => {
-          data.append('images', image);
-        });
+        formData.images.forEach((image) => data.append('images', image));
       }
 
       let saved;
@@ -97,9 +105,10 @@ const AdminProjects = () => {
       title: project.title,
       description: project.description,
       category: project.category || 'general',
-      images: []
+      images: [],
+      imageUrls: ''
     });
-    setExistingImageUrls(project.images?.map(img => getImageUrl(img)) || []);
+    setExistingImageUrls(project.images?.map((img) => getImageUrl(img)) || []);
     setShowModal(true);
   };
 
@@ -121,7 +130,8 @@ const AdminProjects = () => {
       title: { en: '', fr: '', ar: '' },
       description: { en: '', fr: '', ar: '' },
       category: 'general',
-      images: []
+      images: [],
+      imageUrls: ''
     });
     setExistingImageUrls([]);
     setEditingProject(null);
@@ -279,6 +289,18 @@ const AdminProjects = () => {
                 previewUrls={editingProject ? existingImageUrls : []}
                 max={10}
               />
+              <div>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('admin.imageUrls')}</label>
+                <textarea
+                  name="imageUrls"
+                  value={formData.imageUrls}
+                  onChange={(e) => setFormData({ ...formData, imageUrls: e.target.value })}
+                  placeholder="https://example.com/photo1.jpg (one URL per line)"
+                  rows={3}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 resize-none"
+                />
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('admin.imageUrlsHint')}</p>
+              </div>
 
               <div className="flex gap-3 pt-2">
                 <button

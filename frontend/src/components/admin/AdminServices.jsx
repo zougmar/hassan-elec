@@ -16,7 +16,8 @@ const AdminServices = () => {
     title: { en: '', fr: '', ar: '' },
     description: { en: '', fr: '', ar: '' },
     order: 0,
-    image: null
+    image: null,
+    imageUrl: ''
   });
   const [preview, setPreview] = useState(null);
 
@@ -45,7 +46,9 @@ const AdminServices = () => {
         }
       });
     } else if (e.target.name !== 'image') {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+      const next = { ...formData, [e.target.name]: e.target.value };
+      if (e.target.name === 'imageUrl') setPreview(e.target.value?.trim() || (formData.image ? null : (editingService?.image ? getImageUrl(editingService.image) : null)));
+      setFormData(next);
     }
   };
 
@@ -56,6 +59,10 @@ const AdminServices = () => {
       data.append('title', JSON.stringify(formData.title));
       data.append('description', JSON.stringify(formData.description));
       data.append('order', formData.order);
+      const imageUrlTrim = formData.imageUrl?.trim();
+      if (imageUrlTrim && (imageUrlTrim.startsWith('http://') || imageUrlTrim.startsWith('https://'))) {
+        data.append('imageUrl', imageUrlTrim);
+      }
       if (formData.image) {
         data.append('image', formData.image);
       }
@@ -90,13 +97,16 @@ const AdminServices = () => {
 
   const handleEdit = (service) => {
     setEditingService(service);
+    const existingImage = service.image;
+    const isExistingUrl = existingImage && (existingImage.startsWith('http://') || existingImage.startsWith('https://'));
     setFormData({
       title: service.title,
       description: service.description,
       order: service.order || 0,
-      image: null
+      image: null,
+      imageUrl: isExistingUrl ? existingImage : ''
     });
-    setPreview(service.image ? getImageUrl(service.image) : null);
+    setPreview(existingImage ? getImageUrl(existingImage) : null);
     setShowModal(true);
   };
 
@@ -118,7 +128,8 @@ const AdminServices = () => {
       title: { en: '', fr: '', ar: '' },
       description: { en: '', fr: '', ar: '' },
       order: 0,
-      image: null
+      image: null,
+      imageUrl: ''
     });
     setPreview(null);
     setEditingService(null);
@@ -254,9 +265,24 @@ const AdminServices = () => {
                 <ImageUploadSingle
                   label={t('admin.image')}
                   value={formData.image}
-                  onChange={(file) => setFormData({ ...formData, image: file })}
-                  previewUrl={editingService?.image ? getImageUrl(editingService.image) : null}
+                  onChange={(file) => {
+                    setFormData({ ...formData, image: file, imageUrl: '' });
+                    setPreview(file ? null : (formData.imageUrl?.trim() || (editingService?.image ? getImageUrl(editingService.image) : null)));
+                  }}
+                  previewUrl={formData.image ? null : (preview || formData.imageUrl?.trim() || (editingService?.image ? getImageUrl(editingService.image) : null))}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('admin.imageUrl')}</label>
+                <input
+                  type="url"
+                  name="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
+                />
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('admin.imageUrlHint')}</p>
               </div>
 
               <div>

@@ -37,6 +37,7 @@ router.post('/login', async (req, res) => {
               id: manager._id,
               email: manager.email,
               name: manager.name,
+              photo: manager.photo || '',
               role: manager.role,
               type: 'manager'
             }
@@ -51,6 +52,8 @@ router.post('/login', async (req, res) => {
           user: {
             id: user._id,
             email: user.email,
+            name: user.name || '',
+            photo: user.photo || '',
             role: user.role,
             type: 'user'
           }
@@ -90,12 +93,14 @@ router.post('/employee/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    const empName = typeof employee.emp_name === 'object' ? employee.emp_name?.en : employee.emp_name;
     res.json({
       token: generateToken(employee._id, 'employee'),
       user: {
         id: employee._id,
         email: employee.emp_email,
-        name: employee.emp_name,
+        name: empName || employee.emp_name,
+        photo: employee.photo || '',
         role: 'employee',
         type: 'employee'
       }
@@ -116,6 +121,8 @@ router.get('/me', protect, async (req, res) => {
         user: {
           id: req.user._id,
           email: req.user.email,
+          name: req.user.name || '',
+          photo: req.user.photo || '',
           role: req.user.role,
           type: 'user'
         }
@@ -127,6 +134,7 @@ router.get('/me', protect, async (req, res) => {
           id: req.user._id,
           email: req.user.email,
           name: req.user.name,
+          photo: req.user.photo || '',
           role: req.user.role,
           type: 'manager'
         }
@@ -139,6 +147,7 @@ router.get('/me', protect, async (req, res) => {
           id: req.user._id,
           email: req.user.emp_email,
           name: name || req.user.emp_name,
+          photo: req.user.photo || '',
           role: 'employee',
           type: 'employee'
         }
