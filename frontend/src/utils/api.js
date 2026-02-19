@@ -24,13 +24,11 @@ const api = axios.create({
   }
 });
 
-// Ensure every request uses the API base (fixes 405 on Vercel when path starts with /)
+// Axios does not prepend baseURL when url starts with /. Normalize so baseURL is always used.
 api.interceptors.request.use((config) => {
-  const url = config.url || '';
-  if (url.startsWith('/') && !url.startsWith('/api')) {
-    const base = (config.baseURL || baseURL || '').replace(/\/$/, '');
-    config.url = base ? base + url : url;
-    config.baseURL = '';
+  const url = (config.url || '').trim();
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    config.url = url.slice(1); // e.g. '/auth/login' -> 'auth/login' so baseURL '/api' is prepended
   }
   return config;
 });
