@@ -16,11 +16,23 @@ function getApiBaseUrl() {
   return envUrl || (isDev ? 'http://localhost:5000/api' : '/api');
 }
 
+const baseURL = getApiBaseUrl();
 const api = axios.create({
-  baseURL: getApiBaseUrl(),
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
+});
+
+// Ensure every request uses the API base (fixes 405 on Vercel when path starts with /)
+api.interceptors.request.use((config) => {
+  const url = config.url || '';
+  if (url.startsWith('/') && !url.startsWith('/api')) {
+    const base = (config.baseURL || baseURL || '').replace(/\/$/, '');
+    config.url = base ? base + url : url;
+    config.baseURL = '';
+  }
+  return config;
 });
 
 // Add token to requests if available
