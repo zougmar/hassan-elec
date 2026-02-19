@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const WhatsAppIcon = ({ className }) => (
   <svg
@@ -12,9 +13,11 @@ const WhatsAppIcon = ({ className }) => (
 );
 
 const WhatsAppButton = () => {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '+212638463432';
-  const message = encodeURIComponent('Hello! I need electrical services.');
+  const defaultMessage = t('common.whatsappDefaultMessage');
+  const message = encodeURIComponent(defaultMessage);
   const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${message}`;
 
   return (
@@ -26,7 +29,7 @@ const WhatsAppButton = () => {
         className="group flex items-center justify-center"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        aria-label="Contact on WhatsApp"
+        aria-label={t('common.whatsappTooltip')}
       >
         {/* Tooltip */}
         <div
@@ -34,7 +37,7 @@ const WhatsAppButton = () => {
             isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'
           }`}
         >
-          Chat with us
+          {t('common.whatsappTooltip')}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rotate-45 w-2.5 h-2.5 bg-slate-900 border-r border-b border-slate-700/50 rounded-sm" />
         </div>
 

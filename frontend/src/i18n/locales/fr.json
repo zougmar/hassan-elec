@@ -133,6 +133,8 @@
     "loading": "Chargement...",
     "error": "Erreur",
     "close": "Fermer",
-    "select": "Sélectionner"
+    "select": "Sélectionner",
+    "whatsappTooltip": "Discutez avec nous",
+    "whatsappDefaultMessage": "Bonjour, je suis intéressé(e) par vos services électriques. Pourriez-vous me fournir plus d'informations et vos disponibilités ?"
   }
 }

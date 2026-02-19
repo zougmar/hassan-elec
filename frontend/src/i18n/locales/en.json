@@ -132,6 +132,8 @@
     "loading": "Loading...",
     "error": "Error",
     "close": "Close",
-    "select": "Select"
+    "select": "Select",
+    "whatsappTooltip": "Chat with us",
+    "whatsappDefaultMessage": "Hello, I am interested in your electrical services. Could you please provide more information and availability?"
   }
 }
