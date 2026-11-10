@@ -25,9 +25,18 @@ export function SocketProvider({ children }) {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    // Socket.io needs a long-lived Node server (works locally). On Vercel serverless it may not connect.
+    // Socket.io needs a long-lived Node server (works locally only).
+    // Vercel serverless does not support persistent WebSockets — skip there.
     const url = getSocketUrl();
     if (!url) return undefined;
+
+    const isLocal =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+    if (!isLocal) {
+      return undefined;
+    }
 
     const socket = io(url, {
       path: '/socket.io',

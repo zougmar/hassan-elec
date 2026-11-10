@@ -74,23 +74,27 @@ This creates:
 
 ## Deploy on Vercel (frontend + backend on one URL)
 
-This repo is set up so **one Vercel project** serves both the frontend and the API:
+This repo uses **Vercel Services** (`vercel.json`): one project, two services:
 
-1. Push the code to GitHub and import the repo in Vercel.
-2. Vercel builds the frontend and deploys the API at **the same domain** (e.g. `https://hassan-elec.vercel.app`).
-3. The frontend automatically uses **`/api`** on that domain, so no extra URL config is needed.
+- **`frontend`** (Vite) — public site
+- **`backend`** (Express) — public under `/api` and `/uploads`
+
+1. Push the code to GitHub (Vercel rebuilds automatically), or run `vercel --prod` after `vercel login`.
+2. Frontend and API share the same domain (e.g. `https://hassan-elec.vercel.app`).
+3. The frontend calls **`/api`** on that domain — do **not** set `VITE_API_URL` for this setup.
 
 **Environment variables in Vercel (Project → Settings → Environment Variables):**
 
 | Variable | Value |
 |----------|--------|
-| `MONGODB_URI` | Your MongoDB Atlas connection string |
+| `MONGODB_URI` | Your MongoDB Atlas connection string (**required**) |
 | `JWT_SECRET` | A long random secret (min 32 chars) |
 | `JWT_EXPIRE` | `7d` |
 | `ADMIN_EMAIL` | (optional) Admin login email |
 | `ADMIN_PASSWORD` | (optional) Admin login password |
+| `BLOB_READ_WRITE_TOKEN` | (optional) For durable image uploads |
 
-**Do not set** `VITE_API_URL` for this setup — the app uses the same URL for the site and the API.
+After changing env vars, **Redeploy**. Confirm https://your-app.vercel.app/api/health returns `"status":"OK"`.
 
 **If login fails on Vercel:**
 
