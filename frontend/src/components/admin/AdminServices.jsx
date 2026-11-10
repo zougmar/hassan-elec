@@ -5,9 +5,13 @@ import { getImageUrl } from '../../utils/imageUrl';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { ImageUploadSingle } from '../ui/ImageUpload';
+import { useConfirm } from '../ui/ConfirmDialog';
+import { useSocket } from '../../context/SocketContext';
 
 const AdminServices = () => {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
+  const { on } = useSocket();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -24,6 +28,12 @@ const AdminServices = () => {
   useEffect(() => {
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    return on('service:changed', () => {
+      fetchServices();
+    });
+  }, [on]);
 
   const fetchServices = async () => {
     try {
@@ -111,7 +121,13 @@ const AdminServices = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t('admin.deleteConfirm'))) return;
+    const ok = await confirm({
+      title: t('admin.delete'),
+      message: t('admin.deleteConfirm'),
+      confirmLabel: t('admin.delete'),
+      cancelLabel: t('admin.cancel')
+    });
+    if (!ok) return;
 
     try {
       await api.delete(`/services/${id}`);
@@ -141,7 +157,7 @@ const AdminServices = () => {
     <div className="font-sans">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.services')}</h1>
+          <h1 className="font-display text-2xl font-bold text-slate-900">{t('admin.services')}</h1>
           <p className="text-slate-500 mt-1">Manage your service offerings</p>
         </div>
         <button
@@ -149,7 +165,7 @@ const AdminServices = () => {
             resetForm();
             setShowModal(true);
           }}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white bg-primary-700 hover:bg-primary-600 transition-colors shadow-lg shadow-primary-900/20"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-slate-950 bg-electric-500 hover:bg-electric-400 transition-colors shadow-lg shadow-electric-500/20"
         >
           <Plus className="w-5 h-5" />
           <span>{t('admin.add')}</span>

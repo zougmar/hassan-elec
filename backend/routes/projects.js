@@ -1,15 +1,10 @@
 import express from 'express';
 import Project from '../models/Project.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
-import { upload, useMemoryStorage } from '../middleware/upload.js';
-import { uploadBuffer as uploadToCloudinary, isCloudinaryConfigured } from '../utils/cloudinary.js';
-import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
+import { upload } from '../middleware/upload.js';
+import { resolveImageUrl, isImageUrl } from '../utils/resolveImageUrl.js';
 
 const router = express.Router();
-
-function isImageUrl(str) {
-  return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://')) && str.trim().length > 0;
-}
 
 /** Parse imageUrls from body (JSON array of strings). Returns array of valid URLs. */
 function parseImageUrlsFromBody(body) {
@@ -23,23 +18,13 @@ function parseImageUrlsFromBody(body) {
   }
 }
 
-/** Upload to Cloudinary or Vercel Blob when configured; otherwise return /uploads paths. */
+/** Upload each file to durable storage (or local /uploads). */
 async function resolveImageUrls(files) {
-  if (useMemoryStorage && files[0]?.buffer) {
-    const urls = [];
-    for (const file of files) {
-      let url = null;
-      if (isCloudinaryConfigured) {
-        url = await uploadToCloudinary(file.buffer, file.mimetype, 'hassan-elec/projects');
-      }
-      if (!url && isBlobConfigured) {
-        url = await uploadBufferToBlob(file.buffer, file.mimetype, 'hassan-elec/projects');
-      }
-      if (url) urls.push(url);
-    }
-    if (urls.length > 0) return urls;
+  const urls = [];
+  for (const file of files) {
+    urls.push(await resolveImageUrl(file, 'hassan-elec/projects'));
   }
-  return files.map(file => `/uploads/${file.filename}`);
+  return urls;
 }
 
 // @route   GET /api/projects
@@ -113,7 +98,7 @@ router.post('/', protect, adminOrManager, upload.array('images', 10), async (req
     res.status(201).json(project);
   } catch (error) {
     console.error('Create project error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 
@@ -161,7 +146,7 @@ router.put('/:id', protect, adminOrManager, upload.array('images', 10), async (r
     res.json(project);
   } catch (error) {
     console.error('Update project error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 

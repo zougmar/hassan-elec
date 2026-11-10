@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../ui/ConfirmDialog';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 
 const AdminTasks = () => {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const [tasks, setTasks] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -79,7 +81,8 @@ const AdminTasks = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t('admin.deleteConfirm'))) return;
+    const ok = await confirm({ title: t('admin.delete'), message: t('admin.deleteConfirm'), confirmLabel: t('admin.delete'), cancelLabel: t('admin.cancel') });
+    if (!ok) return;
     try {
       await api.delete(`/tasks/${id}`);
       toast.success(t('admin.deleted'));

@@ -3,28 +3,14 @@ import User from '../models/User.js';
 import Manager from '../models/Manager.js';
 import Employee from '../models/Employee.js';
 import { protect } from '../middleware/roles.js';
-import { upload, useMemoryStorage } from '../middleware/upload.js';
-import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
-import { uploadBuffer as uploadToCloudinary, isCloudinaryConfigured } from '../utils/cloudinary.js';
+import { upload } from '../middleware/upload.js';
+import { resolveImageUrl, isImageUrl } from '../utils/resolveImageUrl.js';
 
 const router = express.Router();
 
-function isImageUrl(str) {
-  return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://')) && str.trim().length > 0;
-}
-
 async function resolvePhotoUrl(file) {
-  if (useMemoryStorage && file?.buffer) {
-    let url = null;
-    if (isCloudinaryConfigured) {
-      url = await uploadToCloudinary(file.buffer, file.mimetype, 'hassan-elec/profile');
-    }
-    if (!url && isBlobConfigured) {
-      url = await uploadBufferToBlob(file.buffer, file.mimetype, 'hassan-elec/profile');
-    }
-    if (url) return url;
-  }
-  return file ? `/uploads/${file.filename}` : '';
+  if (!file) return '';
+  return resolveImageUrl(file, 'hassan-elec/profile');
 }
 
 function toUserResponse(doc, type) {

@@ -15,6 +15,7 @@ import managerRoutes from './routes/managers.js';
 import employeeRoutes from './routes/employees.js';
 import taskRoutes from './routes/tasks.js';
 import profileRoutes from './routes/profile.js';
+import analyticsRoutes from './routes/analytics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,8 +34,18 @@ if (!cached) cached = global.mongoose = { conn: null, promise: null };
 async function connectDB() {
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/hassan-elec';
-    cached.promise = mongoose.connect(uri).then((m) => m);
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+      throw new Error('MONGODB_URI is not set. Add it in Vercel → Project → Settings → Environment Variables.');
+    }
+    cached.promise = mongoose
+      .connect(uri, { serverSelectionTimeoutMS: 10000 })
+      .then((m) => m)
+      .catch((err) => {
+        // Allow retry on the next request after a failed attempt
+        cached.promise = null;
+        throw err;
+      });
   }
   cached.conn = await cached.promise;
   return cached.conn;
@@ -45,8 +56,11 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    console.error('DB connection error:', err);
-    res.status(500).json({ message: 'Database connection failed' });
+    console.error('DB connection error:', err?.message || err);
+    res.status(500).json({
+      message: 'Database connection failed',
+      detail: err?.message || 'Unknown error',
+    });
   }
 });
 
@@ -67,6 +81,7 @@ app.use('/api/managers', managerRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

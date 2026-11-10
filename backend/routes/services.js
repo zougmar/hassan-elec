@@ -1,29 +1,11 @@
 import express from 'express';
 import Service from '../models/Service.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
-import { upload, useMemoryStorage } from '../middleware/upload.js';
-import { uploadBuffer as uploadToCloudinary, isCloudinaryConfigured } from '../utils/cloudinary.js';
-import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
+import { upload } from '../middleware/upload.js';
+import { resolveImageUrl, isImageUrl } from '../utils/resolveImageUrl.js';
+import { emitToAdmin } from '../utils/socket.js';
 
 const router = express.Router();
-
-function isImageUrl(str) {
-  return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://')) && str.trim().length > 0;
-}
-
-async function resolveImageUrl(file, folder = 'hassan-elec') {
-  if (useMemoryStorage && file.buffer) {
-    let url = null;
-    if (isCloudinaryConfigured) {
-      url = await uploadToCloudinary(file.buffer, file.mimetype, folder);
-    }
-    if (!url && isBlobConfigured) {
-      url = await uploadBufferToBlob(file.buffer, file.mimetype, folder);
-    }
-    if (url) return url;
-  }
-  return `/uploads/${file.filename}`;
-}
 
 // @route   GET /api/services
 // @desc    Get all services
@@ -93,11 +75,12 @@ router.post('/', protect, adminOrManager, upload.single('image'), async (req, re
 
     const service = new Service(serviceData);
     await service.save();
+    emitToAdmin('service:changed', { action: 'create', service });
 
     res.status(201).json(service);
   } catch (error) {
     console.error('Create service error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 
@@ -143,10 +126,11 @@ router.put('/:id', protect, adminOrManager, upload.single('image'), async (req, 
     }
 
     await service.save();
+    emitToAdmin('service:changed', { action: 'update', service });
     res.json(service);
   } catch (error) {
     console.error('Update service error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 
@@ -162,6 +146,7 @@ router.delete('/:id', protect, adminOrManager, async (req, res) => {
     }
 
     await Service.findByIdAndDelete(req.params.id);
+    emitToAdmin('service:changed', { action: 'delete', id: req.params.id });
     res.json({ message: 'Service deleted' });
   } catch (error) {
     console.error('Delete service error:', error);

@@ -1,25 +1,11 @@
 import express from 'express';
 import Request from '../models/Request.js';
 import { protect, adminOrManager } from '../middleware/roles.js';
-import { upload, useMemoryStorage } from '../middleware/upload.js';
-import { uploadBuffer as uploadToCloudinary, isCloudinaryConfigured } from '../utils/cloudinary.js';
-import { uploadBufferToBlob, isBlobConfigured } from '../utils/blob.js';
+import { upload } from '../middleware/upload.js';
+import { resolveImageUrl } from '../utils/resolveImageUrl.js';
+import { emitToAdmin } from '../utils/socket.js';
 
 const router = express.Router();
-
-async function resolveImageUrl(file, folder = 'hassan-elec') {
-  if (useMemoryStorage && file.buffer) {
-    let url = null;
-    if (isCloudinaryConfigured) {
-      url = await uploadToCloudinary(file.buffer, file.mimetype, folder);
-    }
-    if (!url && isBlobConfigured) {
-      url = await uploadBufferToBlob(file.buffer, file.mimetype, folder);
-    }
-    if (url) return url;
-  }
-  return `/uploads/${file.filename}`;
-}
 
 // @route   GET /api/requests
 // @desc    Get all requests
@@ -98,11 +84,12 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     const newRequest = new Request(requestData);
     await newRequest.save();
+    emitToAdmin('request:new', newRequest);
 
     res.status(201).json(newRequest);
   } catch (error) {
     console.error('Create request error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 
@@ -123,10 +110,11 @@ router.put('/:id', protect, adminOrManager, async (req, res) => {
     }
 
     await request.save();
+    emitToAdmin('request:updated', request);
     res.json(request);
   } catch (error) {
     console.error('Update request error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 

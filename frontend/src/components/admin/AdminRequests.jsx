@@ -4,9 +4,11 @@ import api from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUrl';
 import toast from 'react-hot-toast';
 import { Trash2, Eye, X, AlertTriangle } from 'lucide-react';
+import { useSocket } from '../../context/SocketContext';
 
 const AdminRequests = () => {
   const { t } = useTranslation();
+  const { on } = useSocket();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -17,6 +19,19 @@ const AdminRequests = () => {
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  useEffect(() => {
+    const offNew = on('request:new', (request) => {
+      setRequests((prev) => [request, ...prev.filter((r) => r._id !== request._id)]);
+    });
+    const offUpdated = on('request:updated', (request) => {
+      setRequests((prev) => prev.map((r) => (r._id === request._id ? request : r)));
+    });
+    return () => {
+      offNew();
+      offUpdated();
+    };
+  }, [on]);
 
   const fetchRequests = async () => {
     try {
@@ -99,7 +114,7 @@ const AdminRequests = () => {
   return (
     <div className="font-sans">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">{t('admin.requests')}</h1>
+        <h1 className="font-display text-2xl font-bold text-slate-900">{t('admin.requests')}</h1>
         <p className="text-slate-500 mt-1">View and manage client service requests</p>
       </div>
 

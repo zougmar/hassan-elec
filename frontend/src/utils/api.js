@@ -18,10 +18,7 @@ function getApiBaseUrl() {
 
 const baseURL = getApiBaseUrl();
 const api = axios.create({
-  baseURL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL
 });
 
 // Axios does not prepend baseURL when url starts with /. Normalize so baseURL is always used.
@@ -30,6 +27,17 @@ api.interceptors.request.use((config) => {
   if (url.startsWith('/') && !url.startsWith('//')) {
     config.url = url.slice(1); // e.g. '/auth/login' -> 'auth/login' so baseURL '/api' is prepended
   }
+
+  // FormData must set its own multipart boundary — never force application/json
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (config.headers) {
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+    }
+  } else if (!config.headers?.['Content-Type'] && !config.headers?.['content-type']) {
+    config.headers = { ...config.headers, 'Content-Type': 'application/json' };
+  }
+
   return config;
 });
 
