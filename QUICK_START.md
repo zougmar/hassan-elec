@@ -74,14 +74,12 @@ This creates:
 
 ## Deploy on Vercel (frontend + backend on one URL)
 
-This repo uses **Vercel Services** (`vercel.json`): one project, two services:
+This repo is set up so **one Vercel project** serves both the frontend and the API:
 
-- **`frontend`** (Vite) — public site
-- **`backend`** (Express) — public under `/api` and `/uploads`
-
-1. Push the code to GitHub (Vercel rebuilds automatically), or run `vercel --prod` after `vercel login`.
-2. Frontend and API share the same domain (e.g. `https://hassan-elec.vercel.app`).
-3. The frontend calls **`/api`** on that domain — do **not** set `VITE_API_URL` for this setup.
+1. Push the code to GitHub and import the repo in Vercel (or reconnect if the deployment went missing).
+2. Vercel builds the frontend and deploys the API at **the same domain** (e.g. `https://hassan-elec.vercel.app`).
+3. The frontend automatically uses **`/api`** on that domain, so no extra URL config is needed.
+4. Entry: root `api/index.js` → Express `backend/app.js`. Routing is in root `vercel.json`.
 
 **Environment variables in Vercel (Project → Settings → Environment Variables):**
 
@@ -93,6 +91,8 @@ This repo uses **Vercel Services** (`vercel.json`): one project, two services:
 | `ADMIN_EMAIL` | (optional) Admin login email |
 | `ADMIN_PASSWORD` | (optional) Admin login password |
 | `BLOB_READ_WRITE_TOKEN` | (optional) For durable image uploads |
+
+**Do not set** `VITE_API_URL` for this setup — the app uses the same URL for the site and the API.
 
 After changing env vars, **Redeploy**. Confirm https://your-app.vercel.app/api/health returns `"status":"OK"`.
 
